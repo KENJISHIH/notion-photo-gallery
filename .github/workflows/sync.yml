@@ -1,0 +1,43 @@
+name: Sync Notion → GitHub Pages
+
+on:
+  schedule:
+    # 每天台灣時間早上 8:00（UTC 00:00）自動執行
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    # 允許手動在 GitHub 介面點「Run workflow」觸發
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 不需要額外套件，全部用標準函式庫
+
+      - name: Fetch Notion data
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+        run: python fetch_notion.py
+
+      - name: Generate HTML
+        run: python generate_html.py
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .       # 把 index.html 發佈到 gh-pages 分支
+          publish_branch: gh-pages
+          keep_files: false
