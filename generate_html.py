@@ -8,6 +8,8 @@ import re
 from collections import defaultdict
 from datetime import datetime
 
+SITE_PASSWORD = "1010"   # ← 在這裡改密碼
+
 with open("albums.json", encoding="utf-8") as f:
     data = json.load(f)
 
@@ -212,6 +214,21 @@ main{{max-width:1080px;margin:0 auto;padding:56px 20px 100px}}
 .link-google:hover{{background:rgba(66,133,244,.2);border-color:rgba(66,133,244,.55)}}
 .no-link{{font-size:.88rem;color:var(--muted);font-style:italic;padding:5px 0;letter-spacing:.04em}}
 
+/* ── Password overlay ── */
+#pw-overlay{{position:fixed;inset:0;background:var(--paper);z-index:9999;display:flex;align-items:center;justify-content:center;padding:32px}}
+#pw-overlay.hidden{{display:none}}
+.pw-box{{text-align:center;max-width:340px;width:100%}}
+.pw-title{{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--accent);letter-spacing:.1em;margin-bottom:6px}}
+.pw-sub{{font-size:.8rem;letter-spacing:.18em;color:var(--muted);margin-bottom:36px}}
+.pw-input{{width:100%;padding:14px 18px;font-family:'Noto Serif TC',serif;font-size:1.1rem;text-align:center;letter-spacing:.25em;border:1px solid var(--sepia);border-radius:4px;background:var(--card-bg);color:var(--ink);outline:none;transition:border-color .2s}}
+.pw-input:focus{{border-color:var(--accent)}}
+.pw-btn{{margin-top:16px;width:100%;padding:14px;font-family:'Noto Serif TC',serif;font-size:1rem;letter-spacing:.15em;background:var(--accent);color:var(--paper);border:none;border-radius:4px;cursor:pointer;transition:opacity .2s}}
+.pw-btn:hover{{opacity:.85}}
+.pw-error{{margin-top:12px;font-size:.82rem;color:var(--rust);letter-spacing:.08em;min-height:1.2em}}
+.pw-ornament{{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px;color:var(--sepia)}}
+.pw-ornament::before,.pw-ornament::after{{content:'';flex:0 0 48px;height:1px;background:linear-gradient(90deg,transparent,var(--sepia))}}
+.pw-ornament::after{{background:linear-gradient(270deg,transparent,var(--sepia))}}
+
 /* ── Footer ── */
 footer{{text-align:center;padding:36px 20px;font-size:.7rem;letter-spacing:.16em;color:var(--muted);border-top:1px solid rgba(184,154,106,.25)}}
 
@@ -227,6 +244,17 @@ footer{{text-align:center;padding:36px 20px;font-size:.7rem;letter-spacing:.16em
 </style>
 </head>
 <body>
+
+<div id="pw-overlay">
+  <div class="pw-box">
+    <p class="pw-title">家族旅行相簿</p>
+    <p class="pw-sub">僅限家人瀏覽</p>
+    <div class="pw-ornament">✦</div>
+    <input class="pw-input" id="pw-input" type="password" placeholder="請輸入密碼" autocomplete="current-password">
+    <button class="pw-btn" id="pw-btn">進入相簿</button>
+    <p class="pw-error" id="pw-error"></p>
+  </div>
+</div>
 
 <header>
   <span class="header-eyebrow">Family Travel Archive</span>
@@ -254,6 +282,30 @@ footer{{text-align:center;padding:36px 20px;font-size:.7rem;letter-spacing:.16em
 </footer>
 
 <script>
+(function(){{
+  const PW = "{SITE_PASSWORD}";
+  const KEY = "fta_auth";
+  const overlay = document.getElementById('pw-overlay');
+  const input   = document.getElementById('pw-input');
+  const btn     = document.getElementById('pw-btn');
+  const errMsg  = document.getElementById('pw-error');
+
+  if(sessionStorage.getItem(KEY) === '1') {{ overlay.classList.add('hidden'); return; }}
+
+  function tryUnlock(){{
+    if(input.value === PW){{
+      sessionStorage.setItem(KEY,'1');
+      overlay.classList.add('hidden');
+    }} else {{
+      errMsg.textContent = '密碼錯誤，請再試一次';
+      input.value = '';
+      input.focus();
+    }}
+  }}
+  btn.addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', e => {{ if(e.key==='Enter') tryUnlock(); }});
+}})();
+
 const btns = document.querySelectorAll('.filter-btn');
 const sections = document.querySelectorAll('.trip-section');
 btns.forEach(btn => {{
