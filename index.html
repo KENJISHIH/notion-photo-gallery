@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家族旅行相簿</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1c1510;
+  --paper: #f6f1e9;
+  --light: #ede8dc;
+  --sepia: #b89a6a;
+  --rust: #a84e30;
+  --muted: #8a7b68;
+  --accent: #3d2b1f;
+  --card-bg: #fdfaf5;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'Noto Serif TC',serif;min-height:100vh;position:relative}
+body::after{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");pointer-events:none;z-index:999}
+
+/* ── Header ── */
+header{text-align:center;padding:72px 20px 52px;border-bottom:1px solid rgba(184,154,106,.35);background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(184,154,106,.1) 0%,transparent 70%)}
+.header-eyebrow{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.85rem;letter-spacing:.4em;color:var(--sepia);text-transform:uppercase;margin-bottom:18px;display:block}
+header h1{font-size:clamp(2.6rem,8vw,5rem);font-weight:300;letter-spacing:.18em;color:var(--accent);line-height:1.05}
+.header-sub{margin-top:14px;font-size:.8rem;letter-spacing:.22em;color:var(--muted)}
+.ornament{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:28px;color:var(--sepia);font-size:.9rem}
+.ornament::before,.ornament::after{content:'';flex:0 0 80px;height:1px;background:linear-gradient(90deg,transparent,var(--sepia))}
+.ornament::after{background:linear-gradient(270deg,transparent,var(--sepia))}
+
+/* ── Stats ── */
+.stats{display:flex;justify-content:center;gap:48px;padding:28px 20px;background:var(--light);border-bottom:1px solid rgba(184,154,106,.25);flex-wrap:wrap}
+.stat{text-align:center}
+.stat-n{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;color:var(--rust);display:block;line-height:1}
+.stat-l{font-size:.68rem;letter-spacing:.18em;color:var(--muted);margin-top:3px;display:block}
+
+/* ── Filter bar ── */
+.filter-bar{display:flex;justify-content:center;padding:36px 16px 0;flex-wrap:wrap;gap:0}
+.filter-btn{background:none;border:1px solid var(--sepia);border-right:none;padding:9px 18px;font-family:'Noto Serif TC',serif;font-size:.73rem;letter-spacing:.1em;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap}
+.filter-btn:first-child{border-radius:3px 0 0 3px}
+.filter-btn:last-child{border-right:1px solid var(--sepia);border-radius:0 3px 3px 0}
+.filter-btn:hover{background:var(--light);color:var(--accent)}
+.filter-btn.active{background:var(--accent);color:var(--paper);border-color:var(--accent)}
+
+/* ── Main ── */
+main{max-width:1080px;margin:0 auto;padding:56px 20px 100px}
+.trip-section{margin-bottom:72px}
+.trip-section.hidden{display:none}
+
+/* ── Trip header ── */
+.trip-header{display:flex;align-items:baseline;gap:18px;margin-bottom:28px;padding-bottom:14px;border-bottom:1px solid rgba(184,154,106,.35)}
+.trip-year{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--sepia);line-height:1;flex-shrink:0}
+.trip-info{flex:1}
+.trip-name{font-size:1.1rem;font-weight:400;color:var(--accent);letter-spacing:.08em}
+.trip-meta{font-size:.72rem;letter-spacing:.15em;color:var(--muted);margin-top:3px}
+.trip-badge{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.82rem;color:var(--sepia);border:1px solid var(--sepia);padding:3px 12px;border-radius:20px;flex-shrink:0}
+
+/* ── Grid ── */
+.albums-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+
+/* ── Card ── */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.album-card{background:var(--card-bg);border:1px solid rgba(184,154,106,.28);border-radius:4px;overflow:hidden;transition:box-shadow .3s,transform .3s,border-color .3s;animation:rise .5s ease both}
+.album-card:hover{box-shadow:0 10px 36px rgba(61,43,31,.1);transform:translateY(-3px);border-color:var(--sepia)}
+.card-strip{background:var(--accent);color:var(--paper);padding:7px 14px;display:flex;justify-content:space-between;align-items:center}
+.day-label{font-size:.7rem;letter-spacing:.18em}
+.card-date{font-family:'Cormorant Garamond',serif;font-size:.8rem;opacity:.65}
+.card-body{padding:16px}
+.card-title{font-size:.85rem;line-height:1.65;color:var(--ink);margin-bottom:14px;min-height:2.8em}
+.card-links{display:flex;gap:6px;flex-wrap:wrap}
+.card-link{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;letter-spacing:.06em;padding:5px 11px;border-radius:2px;text-decoration:none;transition:all .2s;font-family:'Noto Serif TC',serif}
+.card-link svg{width:12px;height:12px;flex-shrink:0}
+.link-google{background:rgba(66,133,244,.08);color:#1a56b0;border:1px solid rgba(66,133,244,.22)}
+.link-google:hover{background:rgba(66,133,244,.16);border-color:rgba(66,133,244,.45)}
+.no-link{font-size:.7rem;color:var(--muted);font-style:italic;padding:5px 0;letter-spacing:.04em}
+
+/* ── Footer ── */
+footer{text-align:center;padding:36px 20px;font-size:.7rem;letter-spacing:.16em;color:var(--muted);border-top:1px solid rgba(184,154,106,.25)}
+
+@media(max-width:580px){
+  .filter-btn{font-size:.68rem;padding:7px 12px}
+  .trip-year{font-size:2rem}
+  .albums-grid{grid-template-columns:1fr}
+  .stats{gap:28px}
+  .ornament::before,.ornament::after{flex:0 0 40px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="header-eyebrow">Family Travel Archive</span>
+  <h1>家族旅行相簿</h1>
+  <p class="header-sub">施家出遊記錄　2020 — 2026</p>
+  <div class="ornament">✦</div>
+</header>
+
+<div class="stats">
+  <div class="stat"><span class="stat-n">4</span><span class="stat-l">次旅程</span></div>
+  <div class="stat"><span class="stat-n">31</span><span class="stat-l">天記錄</span></div>
+  <div class="stat"><span class="stat-n">30</span><span class="stat-l">個相簿連結</span></div>
+</div>
+
+<div class="filter-bar">
+  <button class="filter-btn active" data-filter="all">全部旅程</button><button class="filter-btn" data-filter="2026日本名古屋">2026日本名古屋</button><button class="filter-btn" data-filter="2025沖繩春假">2025沖繩春假</button><button class="filter-btn" data-filter="2025沖繩過年">2025沖繩過年</button><button class="filter-btn" data-filter="其他">其他</button>
+</div>
+
+<main>
+
+  <section class="trip-section" data-trip="2026日本名古屋">
+    <div class="trip-header">
+      <span class="trip-year">2026</span>
+      <div class="trip-info">
+        <h2 class="trip-name">2026日本名古屋</h2>
+        <p class="trip-meta">2026.02.12 — 2026.02.18</p>
+      </div>
+      <span class="trip-badge">7 天</span>
+    </div>
+    <div class="albums-grid">
+    <div class="album-card" style="animation-delay:0ms">
+      <div class="card-strip">
+        <span class="day-label">Day 1</span>
+        <span class="card-date">2026.02.12</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">出發、LaLaport 名古屋港 AQULS</p>
+        <div class="card-links"><span class="no-link">相簿待上傳</span></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:60ms">
+      <div class="card-strip">
+        <span class="day-label">Day 2</span>
+        <span class="card-date">2026.02.13</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">鈴鹿賽道樂園、Aeon Mall 鈴鹿、義式料理Seria</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/KCptkSwkWKpFw6K87" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:120ms">
+      <div class="card-strip">
+        <span class="day-label">Day 3</span>
+        <span class="card-date">2026.02.14</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">利久牛舌、Costco岐阜羽島倉庫店、迴轉壽司魚べい 名古屋中川店</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/6g4kujNgz2fWA1Mj7" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:180ms">
+      <div class="card-strip">
+        <span class="day-label">Day 4</span>
+        <span class="card-date">2026.02.15</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">名古屋港水族館、LaLaport 名古屋港 AQULS、Caféレストラン ガスト (Gust)</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/nYXMGcqvKpkXUd3U9" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:240ms">
+      <div class="card-strip">
+        <span class="day-label">Day 5</span>
+        <span class="card-date">2026.02.16</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">樂高樂園、年夜飯スギモト百年黑毛和牛</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/pbJ7eDqbhnnLdFAV9" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:300ms">
+      <div class="card-strip">
+        <span class="day-label">Day 6</span>
+        <span class="card-date">2026.02.17</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">MaxValu 買衣服、藥局購物、客美多コメダ珈琲店下午茶、西松屋、名古屋茶屋イオン店、LOPIA超市採購、薩莉亞晚餐</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/sSq7Hg6MoyS31BdbA" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:360ms">
+      <div class="card-strip">
+        <span class="day-label">Day 7</span>
+        <span class="card-date">2026.02.18</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">Costco加油、常滑AEON美食街、中部機場免稅店回程</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/1LdZzgxm24YSLY4F8" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="trip-section" data-trip="2025沖繩春假">
+    <div class="trip-header">
+      <span class="trip-year">2025</span>
+      <div class="trip-info">
+        <h2 class="trip-name">2025沖繩春假</h2>
+        <p class="trip-meta">2025.04.02 — 2025.04.06</p>
+      </div>
+      <span class="trip-badge">5 天</span>
+    </div>
+    <div class="albums-grid">
+    <div class="album-card" style="animation-delay:0ms">
+      <div class="card-strip">
+        <span class="day-label">Day 1</span>
+        <span class="card-date">2025.04.02</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">出發那霸、Lopia超市、鳥貴族串燒</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.google.com/u/1/album/AF1QipNW3IbXEYQ3HruDAe1HOfS5RA2CvMFVe_oIaOXd" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:60ms">
+      <div class="card-strip">
+        <span class="day-label">Day 2</span>
+        <span class="card-date">2025.04.03</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">許田休息站、海豚餵食體驗、沖繩美麗海水族館、Seria買泡澡球、 A&W、日本麥當勞麥香魚</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.google.com/u/1/album/AF1QipOEZS_uMh2sNX8k1DUl4h0TXvL86L_gIpyYkG4Z" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:120ms">
+      <div class="card-strip">
+        <span class="day-label">Day 3</span>
+        <span class="card-date">2025.04.04</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">中城公園/西松屋、DAISO、MaxValu泡瀬店、泡瀨漁港用餐、UNIQLO ABLO Uruma、BEB5飯店泳池玩水、MEGA唐吉軻德 宇流麻店</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.google.com/u/1/album/AF1QipMNpTp6dTcWz4KVFt-MmiLuSrdG1rc8weG1sp2p" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:180ms">
+      <div class="card-strip">
+        <span class="day-label">Day 4</span>
+        <span class="card-date">2025.04.05</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">BEB5飯店泳池玩水、Gusto 沖繩南風原店、沖繩 ASHIBINAA Outlet、iias 沖繩豐崎、焼肉居酒屋こてつ</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.google.com/u/1/album/AF1QipOW-gcbf7uQqc-wLWtpt9l9JKD4ePww2YV0a1F7" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:240ms">
+      <div class="card-strip">
+        <span class="day-label">Day 5</span>
+        <span class="card-date">2025.04.06</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">那霸回程</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.google.com/u/1/album/AF1QipPSYV-nZxAl04VmheFgXcentxnRIvgndQUqdxPS" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="trip-section" data-trip="2025沖繩過年">
+    <div class="trip-header">
+      <span class="trip-year">2025</span>
+      <div class="trip-info">
+        <h2 class="trip-name">2025沖繩過年</h2>
+        <p class="trip-meta">2025.01.23 — 2025.01.29</p>
+      </div>
+      <span class="trip-badge">7 天</span>
+    </div>
+    <div class="albums-grid">
+    <div class="album-card" style="animation-delay:0ms">
+      <div class="card-strip">
+        <span class="day-label">Day 1</span>
+        <span class="card-date">2025.01.23</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">出發那霸、鳥貴族串燒、24hr超市</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.google.com/share/AF1QipNmnDLBSqoBiRJsEcPV3irQWOOQOo6dbet-NAGae8E7GCtpwM0unpw2rb7ShIlokQ" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:60ms">
+      <div class="card-strip">
+        <span class="day-label">Day 2</span>
+        <span class="card-date">2025.01.24</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">浦添大公園/西松屋、Ａ&Ｗ 牧港店、藥局、Gusto 浦添牧港店、超市</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.google.com/share/AF1QipP0AXAVq8HaKiYgDJ_KFNzm7pSIRx0aeWOmRwn57Nf-s7jczs2C8oJuH3cbK3yfrw" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:120ms">
+      <div class="card-strip">
+        <span class="day-label">Day 3</span>
+        <span class="card-date">2025.01.25</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">DMM Kariyushi水族館、暖暮拉麵、沖繩 ASHIBINAA Outlet、焼肉居酒屋こてつ</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.google.com/share/AF1QipP2VsAT644CzgD8QDMP-4Gi-ItzkyPd-NFazsqCtHNQEKDDS8kaG39YIsbWCLuS1A" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:180ms">
+      <div class="card-strip">
+        <span class="day-label">Day 4</span>
+        <span class="card-date">2025.01.26</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">沖繩兒童王國、永旺夢樂城 沖繩 來客夢、MEGA唐吉訶德宜野灣店</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.google.com/share/AF1QipN-t3eN41ZCsCt7F6Vc4wRYPj5LeN5z8JsfEOkxrO4Udwq3xxe6a-0j4K8dfmqPnA" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:240ms">
+      <div class="card-strip">
+        <span class="day-label">Day 5</span>
+        <span class="card-date">2025.01.27</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">teamLab Future Park 沖繩、Gusto 沖繩南風原店、COSTCO好市多 沖繩店、飯店自己煮</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.google.com/share/AF1QipOK7YXKEXdg_43vb1kd1wqFYIijL5AwW2z5_yPCtH60uGNqfRQT5ovqq3T45Gjbrw" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:300ms">
+      <div class="card-strip">
+        <span class="day-label">Day 6</span>
+        <span class="card-date">2025.01.28</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">全家在飯店休息、爸爸採購空調風神服、國際通炸牛排、SAN-A浦添西海岸 PARCO CITY、飯店吃年夜飯</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.google.com/share/AF1QipNo83O0Tdn3dfQMLjjUkQjIEFCKBZ9udivUSojtpvahJ1srDE3Uac5mLA5_2WVeAQ" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:360ms">
+      <div class="card-strip">
+        <span class="day-label">Day 7</span>
+        <span class="card-date">2025.01.29</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">那霸回程</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.google.com/share/AF1QipPc0lqXdW5PQUHHQhlHXy25r8490dKvO2BARKbf091iOhWEAUZCDr387OGntYQ4tw" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="trip-section" data-trip="其他">
+    <div class="trip-header">
+      <span class="trip-year">—</span>
+      <div class="trip-info">
+        <h2 class="trip-name">其他</h2>
+        <p class="trip-meta">2020.01.21 — 2024.02.11</p>
+      </div>
+      <span class="trip-badge">12 天</span>
+    </div>
+    <div class="albums-grid">
+    <div class="album-card" style="animation-delay:0ms">
+      <div class="card-strip">
+        <span class="day-label">Day 1</span>
+        <span class="card-date">2020.01.21</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">2020日本名古屋之旅Day1</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/JBQc472Ffzug3tA2A" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:60ms">
+      <div class="card-strip">
+        <span class="day-label">Day 2</span>
+        <span class="card-date">2020.01.22</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">2020日本名古屋之旅Day2</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/KUS6qP2EJbMED6oL7" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:120ms">
+      <div class="card-strip">
+        <span class="day-label">Day 3</span>
+        <span class="card-date">2020.01.23</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">2020日本名古屋之旅Day3</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/cNVvvsQCksEZVukGA" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:180ms">
+      <div class="card-strip">
+        <span class="day-label">Day 4</span>
+        <span class="card-date">2020.01.24</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">2020日本名古屋之旅Day4</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/cwvczsaCgGjrKt1m9" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:240ms">
+      <div class="card-strip">
+        <span class="day-label">Day 5</span>
+        <span class="card-date">2020.01.25</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">2020日本名古屋之旅Day5</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/2tZenxfZzsUoFPgSA" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:300ms">
+      <div class="card-strip">
+        <span class="day-label">Day 6</span>
+        <span class="card-date">2020.01.26</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">2020日本名古屋之旅Day6</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/EEKJ2McrvrignS8d8" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:360ms">
+      <div class="card-strip">
+        <span class="day-label">Day 1</span>
+        <span class="card-date">2024.02.06</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">20240206日本九州福岡旅行Day1</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/E9XAimon9bpxt7Ce6" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:420ms">
+      <div class="card-strip">
+        <span class="day-label">Day 2</span>
+        <span class="card-date">2024.02.07</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">20240207日本九州福岡旅行Day2</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/Ls63HD55umwdemc98" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:480ms">
+      <div class="card-strip">
+        <span class="day-label">Day 3</span>
+        <span class="card-date">2024.02.08</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">太宰府</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/Gw5u5p1gbSg3ww6o9" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:540ms">
+      <div class="card-strip">
+        <span class="day-label">Day 4</span>
+        <span class="card-date">2024.02.09</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">海の中道海浜公園</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/AgpsEypMxt1jFtn57" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:600ms">
+      <div class="card-strip">
+        <span class="day-label">Day 5</span>
+        <span class="card-date">2024.02.10</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">水族館</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/KqrkEr4npWTAXrdf8" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    <div class="album-card" style="animation-delay:660ms">
+      <div class="card-strip">
+        <span class="day-label">Day 6</span>
+        <span class="card-date">2024.02.11</span>
+      </div>
+      <div class="card-body">
+        <p class="card-title">20240211日本九州福岡旅行Day6</p>
+        <div class="card-links"><a class="card-link link-google" href="https://photos.app.goo.gl/2g78a2JH5B814ypy5" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 6.3 2.55"/><path d="M21 3v6h-6"/></svg>
+            Google 相簿 →
+          </a></div>
+      </div>
+    </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  資料來源：Notion 相簿資料庫　·　標籤：家族旅行　·　最後更新：2026.03.23
+</footer>
+
+<script>
+const btns = document.querySelectorAll('.filter-btn');
+const sections = document.querySelectorAll('.trip-section');
+btns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    btns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = btn.dataset.filter;
+    sections.forEach(s => {
+      s.classList.toggle('hidden', f !== 'all' && s.dataset.trip !== f);
+    });
+  });
+});
+</script>
+</body>
+</html>
