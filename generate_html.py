@@ -169,12 +169,12 @@ header h1{{font-size:clamp(2.6rem,8vw,5rem);font-weight:300;letter-spacing:.18em
 /* ── Stats ── */
 .stats{{display:flex;justify-content:center;gap:48px;padding:28px 20px;background:var(--light);border-bottom:1px solid rgba(184,154,106,.25);flex-wrap:wrap}}
 .stat{{text-align:center}}
-.stat-n{{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;color:var(--rust);display:block;line-height:1}}
-.stat-l{{font-size:.68rem;letter-spacing:.18em;color:var(--muted);margin-top:3px;display:block}}
+.stat-n{{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:var(--rust);display:block;line-height:1}}
+.stat-l{{font-size:.82rem;letter-spacing:.18em;color:var(--muted);margin-top:4px;display:block}}
 
 /* ── Filter bar ── */
 .filter-bar{{display:flex;justify-content:center;padding:36px 16px 0;flex-wrap:wrap;gap:0}}
-.filter-btn{{background:none;border:1px solid var(--sepia);border-right:none;padding:9px 18px;font-family:'Noto Serif TC',serif;font-size:.73rem;letter-spacing:.1em;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap}}
+.filter-btn{{background:none;border:1px solid var(--sepia);border-right:none;padding:11px 20px;font-family:'Noto Serif TC',serif;font-size:.85rem;letter-spacing:.1em;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap}}
 .filter-btn:first-child{{border-radius:3px 0 0 3px}}
 .filter-btn:last-child{{border-right:1px solid var(--sepia);border-radius:0 3px 3px 0}}
 .filter-btn:hover{{background:var(--light);color:var(--accent)}}
@@ -189,8 +189,8 @@ main{{max-width:1080px;margin:0 auto;padding:56px 20px 100px}}
 .trip-header{{display:flex;align-items:baseline;gap:18px;margin-bottom:28px;padding-bottom:14px;border-bottom:1px solid rgba(184,154,106,.35)}}
 .trip-year{{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--sepia);line-height:1;flex-shrink:0}}
 .trip-info{{flex:1}}
-.trip-name{{font-size:1.1rem;font-weight:400;color:var(--accent);letter-spacing:.08em}}
-.trip-meta{{font-size:.72rem;letter-spacing:.15em;color:var(--muted);margin-top:3px}}
+.trip-name{{font-size:1.25rem;font-weight:400;color:var(--accent);letter-spacing:.08em}}
+.trip-meta{{font-size:.85rem;letter-spacing:.15em;color:var(--muted);margin-top:4px}}
 .trip-badge{{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.82rem;color:var(--sepia);border:1px solid var(--sepia);padding:3px 12px;border-radius:20px;flex-shrink:0}}
 
 /* ── Grid ── */
@@ -200,27 +200,29 @@ main{{max-width:1080px;margin:0 auto;padding:56px 20px 100px}}
 @keyframes rise{{from{{opacity:0;transform:translateY(14px)}}to{{opacity:1;transform:translateY(0)}}}}
 .album-card{{background:var(--card-bg);border:1px solid rgba(184,154,106,.28);border-radius:4px;overflow:hidden;transition:box-shadow .3s,transform .3s,border-color .3s;animation:rise .5s ease both}}
 .album-card:hover{{box-shadow:0 10px 36px rgba(61,43,31,.1);transform:translateY(-3px);border-color:var(--sepia)}}
-.card-strip{{background:var(--accent);color:var(--paper);padding:7px 14px;display:flex;justify-content:space-between;align-items:center}}
-.day-label{{font-size:.7rem;letter-spacing:.18em}}
-.card-date{{font-family:'Cormorant Garamond',serif;font-size:.8rem;opacity:.65}}
-.card-body{{padding:16px}}
-.card-title{{font-size:.85rem;line-height:1.65;color:var(--ink);margin-bottom:14px;min-height:2.8em}}
-.card-links{{display:flex;gap:6px;flex-wrap:wrap}}
-.card-link{{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;letter-spacing:.06em;padding:5px 11px;border-radius:2px;text-decoration:none;transition:all .2s;font-family:'Noto Serif TC',serif}}
-.card-link svg{{width:12px;height:12px;flex-shrink:0}}
-.link-google{{background:rgba(66,133,244,.08);color:#1a56b0;border:1px solid rgba(66,133,244,.22)}}
-.link-google:hover{{background:rgba(66,133,244,.16);border-color:rgba(66,133,244,.45)}}
-.no-link{{font-size:.7rem;color:var(--muted);font-style:italic;padding:5px 0;letter-spacing:.04em}}
+.card-strip{{background:var(--accent);color:var(--paper);padding:9px 16px;display:flex;justify-content:space-between;align-items:center}}
+.day-label{{font-size:.85rem;letter-spacing:.18em}}
+.card-date{{font-family:'Cormorant Garamond',serif;font-size:.9rem;opacity:.65}}
+.card-body{{padding:18px}}
+.card-title{{font-size:1rem;line-height:1.7;color:var(--ink);margin-bottom:16px;min-height:2.8em}}
+.card-links{{display:flex;gap:8px;flex-wrap:wrap}}
+.card-link{{display:inline-flex;align-items:center;gap:7px;font-size:.9rem;letter-spacing:.06em;padding:11px 18px;border-radius:6px;text-decoration:none;transition:all .2s;font-family:'Noto Serif TC',serif;width:100%;justify-content:center}}
+.card-link svg{{width:16px;height:16px;flex-shrink:0}}
+.link-google{{background:rgba(66,133,244,.1);color:#1a56b0;border:1px solid rgba(66,133,244,.3)}}
+.link-google:hover{{background:rgba(66,133,244,.2);border-color:rgba(66,133,244,.55)}}
+.no-link{{font-size:.88rem;color:var(--muted);font-style:italic;padding:5px 0;letter-spacing:.04em}}
 
 /* ── Footer ── */
 footer{{text-align:center;padding:36px 20px;font-size:.7rem;letter-spacing:.16em;color:var(--muted);border-top:1px solid rgba(184,154,106,.25)}}
 
 @media(max-width:580px){{
-  .filter-btn{{font-size:.68rem;padding:7px 12px}}
+  .filter-btn{{font-size:.82rem;padding:11px 14px}}
   .trip-year{{font-size:2rem}}
   .albums-grid{{grid-template-columns:1fr}}
   .stats{{gap:28px}}
   .ornament::before,.ornament::after{{flex:0 0 40px}}
+  .card-title{{font-size:1.05rem}}
+  .card-link{{font-size:.95rem;padding:14px 18px}}
 }}
 </style>
 </head>
